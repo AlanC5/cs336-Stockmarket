@@ -22,7 +22,7 @@ function list_bids_asks($db) {
     $result = $db->query("SELECT * from INSTRUMENT where TRADING_SYMBOL='$ticker' LIMIT 1");
 
     if(mysqli_num_rows($result) > 0) {
-        echo "Stock Ticker Exists";
+        #echo "Stock Ticker Exists";
         $quotes = $db->query("SELECT * FROM STOCK_QUOTE where TRADING_SYMBOL='$ticker' LIMIT 5");
 
         while ($row = $quotes->fetch_assoc()) {
@@ -32,11 +32,12 @@ function list_bids_asks($db) {
             $ask_size = $row["ASK_SIZE"];
             $bid_price = $row["BID_PRICE"];
             $bid_size = $row["BID_SIZE"];
-            echo "<p>$quote_time --- $ask_price --- $ask_size --- $bid_price --- $bid_size</p>";
+            //
+            echo "<tr><td>$quote_time</td><td>$ask_price</td><td>$ask_size</td><td>$bid_price</td><td>$bid_size</td></tr>";
         }
     }
     else {
-        echo "Stock Ticker does not exists, please choose a different Stock Ticker";
+        echo "Does not exist";
     }
 }
 
