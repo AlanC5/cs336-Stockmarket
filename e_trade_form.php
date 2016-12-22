@@ -18,7 +18,9 @@
     <input type="radio" name="type" value="big" checked> Bid<br>
     <input type="radio" name="type" value="ask"> Ask<br><br>
 
-    Amount: <input type="text" name="amount"><br><br>
+    Price: <input type="number" name="price"><br><br>
+    Size: <input type="number" name="size"><br><br>
+
     Time Frame (Minutes): <input type="number" name="time" min="0" max="30" value="0"><br />
 <input type="submit" value="Submit">
 </form>
