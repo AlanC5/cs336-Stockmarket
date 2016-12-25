@@ -103,11 +103,6 @@ $('#submit').on("click", function(e) {
 
     // Form validation
     if (ticker.length != 0 && price.length != 0 && size.length != 0 && time.length != 0 && type.length != 0) {
-        if(type == "bid") {
-            console.log("bid");
-        } else {
-            console.log("ask");
-        }
         $.ajax({
             method: "POST",
             url: "submit_bid_ask.php",
