@@ -100,7 +100,8 @@ function submit_bid_ask_form($db) {
 
                 // Does not find a match
                 } else {
-                    echo "No current asks matche your bid. No transaction was made. But if there is any ask is post with time frame you set, system will automatically match your bid with that ask.";
+                    echo "An bid was added into STOCK_QUOTE table. ";
+                    echo "No current asks matche your bid. No transaction was made. But if there is any matched ask is post with time frame you set, system will automatically match your bid with that ask.";
                 }
 
             // Fail to insert the bid
@@ -138,10 +139,6 @@ function submit_bid_ask_form($db) {
                 // Assume that we find an ask with desired price but smaller size
                 } else if (mysqli_num_rows($result_partial) > 0){
                     $row = $result_partial->fetch_assoc();
-                    $quote_time = $row["QUOTE_TIME"];
-                    $now = time();
-                    $unix_date = strtotime($quote_time);
-                    echo "$now(), $unix_date";
                     $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size)";
                     if ($db->query($sql) == TRUE) {
                         echo "An ask was added into STOCK_QUOTE table.";
@@ -153,7 +150,8 @@ function submit_bid_ask_form($db) {
 
                 // Does not find a match
                 } else {
-                    echo "No current asks matche your bid. No transaction was made.";
+                    echo "An ask was added into STOCK_QUOTE table.";
+                    echo "No current bids matche your ask. No transaction was made. But if there is any matched bid is post with time frame you set, system will automatically match your ask with that bid.";
                 }
 
             // Fail to insert the bid

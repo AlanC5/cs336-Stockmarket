@@ -13,16 +13,16 @@
 <body>
 <div id="form_container">
 <form action="" method="POST">
-    Ticker: <input type="text" id="ticker" name="ticker" value="aaa">
+    Ticker: <input type="text" id="ticker" name="ticker">
     <button id="Lookup" type="button" onclick="GetTicker();">Lookup</button><br><br>
 
     <input type="radio" name="type" id="bid" value="bid"> Bid<br>
     <input type="radio" name="type" id="ask" value="ask" checked> Ask<br><br>
 
-    Price: <input type="number" name="price" id="price" value="22"><br><br>
-    Size: <input type="number" name="size" id="size" value="22"><br><br>
+    Price: <input type="number" name="price" id="price"><br><br>
+    Size: <input type="number" name="size" id="size"><br><br>
 
-    Time Frame (Minutes): <input type="number" name="time" id="time" min="0" max="30" value="20"><br />
+    Time Frame (Minutes): <input type="number" name="time" id="time" min="0" max="30"><br />
 
     <input id="submit" name="submit" type="submit" value="Submit">
 </form>
