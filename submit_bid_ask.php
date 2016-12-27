@@ -73,10 +73,10 @@ function submit_bid_ask_form($db) {
                 // Price should always match, but for sizes there are two different situations
 
                 // Ask size is greater or equal than the bid's
-                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE ASK_PRICE=$price AND ASK_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
+                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND ASK_PRICE=$price AND ASK_SIZE>=$size LIMIT 1");
 
                 // Ask size is smaller than the bid's
-                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE ASK_PRICE=$price AND ASK_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
+                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND ASK_PRICE=$price AND ASK_SIZE<$size LIMIT 1");
 
                 // Assume that we find an ask which has equal or greater size
                 if (mysqli_num_rows($result) > 0) {
@@ -90,13 +90,12 @@ function submit_bid_ask_form($db) {
 
                 // Assume that we find an ask with desired price but smaller size
                 } else if (mysqli_num_rows($result_partial) > 0){
-                    $row = $result->fetch_assoc();
+                    $row = $result_partial->fetch_assoc();
                     $partial_size = $row["ASK_SIZE"];
-                    $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, partial_size)";
+                    $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $partial_size)";
                     if ($db->query($sql) == TRUE) {
-                        echo "A bid was added into STOCK_QUOTE table.";
                         $remainder = $size - $partial_size;
-                        echo "Only partial transactions were made, please put another bid with remaining size: $remainder.";
+                        echo "A bid was added into STOCK_QUOTE table. Only partial transactions were made, please put another bid with remaining size: $remainder.";
                     } else {
                         echo "A bid was added into STOCK_QUOTE table and a partial ask was found, but transaction failed.";
                     }
@@ -124,20 +123,17 @@ function submit_bid_ask_form($db) {
                 // Price should always match, but for sizes there are two different situations
 
                 // Bid size is greater or equal than the ask's
-                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE BID_PRICE=$price AND BID_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
+                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND BID_PRICE=$price AND BID_SIZE>=$size LIMIT 1");
 
                 // Bid size is smaller than the ask's
-                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE BID_PRICE=$price AND BID_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
+                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND BID_PRICE=$price AND BID_SIZE<$size LIMIT 1");
 
                 // Assume that we find an ask which has equal or greater size
                 if (mysqli_num_rows($result) > 0) {
                     $row = $result->fetch_assoc();
-                    $size2 = $row["BID_SIZE"];
-                    $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size2)";
+                    $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size)";
                     if ($db->query($sql) == TRUE) {
-                        echo "A bid with larger size is found, partial transaction was made successfully, with price: $price, size: $size2";
-                        $newsize = $size - $size2;
-                        echo "Please put another ask with remaining size: $newsize";
+                        echo "A transaction was made successfully, with price: $price, size: $size";
                     } else {
                         echo "An ask was added into STOCK_QUOTE table. And a matched bid was found, but transaction failed.";
                     }
@@ -145,9 +141,11 @@ function submit_bid_ask_form($db) {
                 // Assume that we find an ask with desired price but smaller size
                 } else if (mysqli_num_rows($result_partial) > 0){
                     $row = $result_partial->fetch_assoc();
-                    $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size)";
+                    $size2 = $row["BID_SIZE"];
+                    $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size2)";
                     if ($db->query($sql) == TRUE) {
-                        echo "A transaction was made successfully, with price: $price, size: $size";
+                        $newsize = $size - $size2;
+                        echo "An bid with smaller size is found, partial transaction was made successfully, with price: $price, size: $size2. Please put another ask with remaining size: $newsize";
                     } else {
                         echo "An ask was added into STOCK_QUOTE table. And a matched bid was found, but transaction failed.";
                     }
