@@ -57,7 +57,7 @@ function submit_bid_ask_form($db) {
         $ticker = $row["TRADING_SYMBOL"];
         $price = (float)$_POST["price"];
         $size = (int)$_POST["size"];
-        $time = $_POST["time"];
+        $time = (int)$_POST["time"];
         $random = rand(0, 12000);
 
         // Check if it's a bid or an ask
@@ -73,10 +73,10 @@ function submit_bid_ask_form($db) {
                 // Price should always match, but for sizes there are two different situations
 
                 // Ask size is greater or equal than the bid's
-                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND ASK_PRICE=$price AND ASK_SIZE>=$size LIMIT 1");
+                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND ASK_PRICE=$price AND ASK_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<$time LIMIT 1");
 
                 // Ask size is smaller than the bid's
-                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND ASK_PRICE=$price AND ASK_SIZE<$size LIMIT 1");
+                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND ASK_PRICE=$price AND ASK_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<$time LIMIT 1");
 
                 // Assume that we find an ask which has equal or greater size
                 if (mysqli_num_rows($result) > 0) {
@@ -123,10 +123,10 @@ function submit_bid_ask_form($db) {
                 // Price should always match, but for sizes there are two different situations
 
                 // Bid size is greater or equal than the ask's
-                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND BID_PRICE=$price AND BID_SIZE>=$size LIMIT 1");
+                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND BID_PRICE=$price AND BID_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<$time LIMIT 1");
 
                 // Bid size is smaller than the ask's
-                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND BID_PRICE=$price AND BID_SIZE<$size LIMIT 1");
+                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE TRADING_SYMBOL='$ticker' AND BID_PRICE=$price AND BID_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<$time LIMIT 1");
 
                 // Assume that we find an ask which has equal or greater size
                 if (mysqli_num_rows($result) > 0) {
