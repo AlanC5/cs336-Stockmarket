@@ -1,5 +1,5 @@
 <?php
-//this is a modified version that does part 4 and fixes some typos
+
 $host = "134.74.126.107";
 $username = "F16336dliang";
 $password = "23083903";
@@ -83,9 +83,6 @@ function submit_bid_ask_form($db) {
                         echo "A bid was added into STOCK_QUOTE table.";
                         echo "And a matched ask was found, but transaction failed.";
                     }
-					//$modPrice=pow(1.05, $size); //increase price by 5% per item
-					$sql = "UPDATE STOCK_TRADE SET TRADE_PRICE=TRADE_PRICE*1.05 WHERE TRADE_SIZE>=$size LIMIT 1" ;
-					echo " \n The price on the stock has been increased by 5% for ask in the STOCK_TRADE table ";
 
                 // Assume that we find an ask with desired price but smaller size
                 } else if (mysqli_num_rows($result_partial) > 0){
@@ -95,25 +92,17 @@ function submit_bid_ask_form($db) {
                     if ($db->query($sql) == TRUE) {
                         echo "A bid was added into STOCK_QUOTE table.";
                         $remainder = $size - $partial_size;
-                        echo "Only partial transactions were made, please put another bid with remainding size: $remainder.";
+                        echo "Only partial transactions was made, please put another bid with remainded size: $remainder.";
                     } else {
                         echo "A bid was added into STOCK_QUOTE table.";
                         echo "Partial ask was found, but transaction failed.";
                     }
-					
-					$modPrice=pow(1.05, $size); //this increases the price by 5% per item
-					$sql = "UPDATE STOCK_TRADE SET TRADE_PRICE=TRADE_PRICE*1.05 WHERE TRADE_SIZE>=$size LIMIT 1" ;
-					echo " \n The price on the stock has been increased by 5% for ask in the STOCK_TRADE table ";
+
                 // Does not find a match
                 } else {
-                    echo "A bid was added into STOCK_QUOTE table. ";
-                    echo "No current ask matched your bid. No transaction was made. But if an ask is posted that matches the request within the time period, the system will automatically match your bid with that ask.";
-					
-					$modPrice = pow(.95, $size); // we will decrease the price of things by 5% per number of items
-					$sql = "UPDATE STOCK_TRADE SET TRADE_PRICE=TRADE_PRICE*.95 WHERE TRADE_SIZE>=$size LIMIT 1" ;
-					echo " \n The price on the stock has been decreased by 5% for ask in the STOCK_TRADE table ";
-				
-				}
+                    echo "An bid was added into STOCK_QUOTE table. ";
+                    echo "No current asks matche your bid. No transaction was made. But if there is any matched ask is post with time frame you set, system will automatically match your bid with that ask.";
+                }
 
             // Fail to insert the bid
             } else {
@@ -139,9 +128,9 @@ function submit_bid_ask_form($db) {
                     $size2 = $row["BID_SIZE"];
                     $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size2)";
                     if ($db->query($sql) == TRUE) {
-                        echo "A bid with larger size is found, partial transaction was made successfully, with price: $price, size: $size2";
+                        echo "A bid with larger size is found, partial transaction was make successfully, with price: $price, size: $size2";
                         $newsize = $size - $size2;
-                        echo "Please put another ask with remaining size: $newsize";
+                        echo "Please put a another ask with remainded size: $newsize";
                     } else {
                         echo "An ask was added into STOCK_QUOTE table.";
                         echo "And a matched bid was found, but transaction failed.";
@@ -162,7 +151,7 @@ function submit_bid_ask_form($db) {
                 // Does not find a match
                 } else {
                     echo "An ask was added into STOCK_QUOTE table.";
-                    echo "No current bids matched your ask. No transaction were made. But if there are any matched bids posted within the time frame you set, system will automatically match your ask with that bid.";
+                    echo "No current bids matche your ask. No transaction was made. But if there is any matched bid is post with time frame you set, system will automatically match your ask with that bid.";
                 }
 
             // Fail to insert the bid
