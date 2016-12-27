@@ -92,7 +92,7 @@ function submit_bid_ask_form($db) {
                     if ($db->query($sql) == TRUE) {
                         echo "A bid was added into STOCK_QUOTE table.";
                         $remainder = $size - $partial_size;
-                        echo "Only partial transactions was made, please put another bid with remainded size: $remainder.";
+                        echo "Only partial transactions were made, please put another bid with remaining size: $remainder.";
                     } else {
                         echo "A bid was added into STOCK_QUOTE table.";
                         echo "Partial ask was found, but transaction failed.";
@@ -128,9 +128,9 @@ function submit_bid_ask_form($db) {
                     $size2 = $row["BID_SIZE"];
                     $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size2)";
                     if ($db->query($sql) == TRUE) {
-                        echo "A bid with larger size is found, partial transaction was make successfully, with price: $price, size: $size2";
+                        echo "A bid with larger size is found, partial transaction was made successfully, with price: $price, size: $size2";
                         $newsize = $size - $size2;
-                        echo "Please put a another ask with remainded size: $newsize";
+                        echo "Please put another ask with remaining size: $newsize";
                     } else {
                         echo "An ask was added into STOCK_QUOTE table.";
                         echo "And a matched bid was found, but transaction failed.";
@@ -151,7 +151,7 @@ function submit_bid_ask_form($db) {
                 // Does not find a match
                 } else {
                     echo "An ask was added into STOCK_QUOTE table.";
-                    echo "No current bids matche your ask. No transaction was made. But if there is any matched bid is post with time frame you set, system will automatically match your ask with that bid.";
+                    echo "No current bids matched your ask. No transaction were made. But if there are any matched bid posted within the time frame you set, system will automatically match your ask with that bid.";
                 }
 
             // Fail to insert the bid
