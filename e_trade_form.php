@@ -51,6 +51,9 @@
 
 <script type="text/javascript">
 
+
+/////////////////////////// lookup_form //////////////////////////////
+
 function GetTicker()
 {
     var ticker = document.getElementById('ticker').value;
@@ -80,6 +83,7 @@ function GetTicker()
         alert("Cannot search for empty Ticker.");
     }
 }
+////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////// submit_bid_ask_form //////////////////////////////

@@ -1,9 +1,9 @@
 <?php
 
 $host = "134.74.126.107";
-$username = "F16336dliang";
-$password = "23083903";
-$my_database = "F16336dliang";
+$username = "username";
+$password = "password";
+$my_database = "F16336team3";
 
 // Connection
 $db = new mysqli($host, $username, $password, $my_database);
@@ -21,10 +21,9 @@ function list_bids_asks($db) {
     $ticker = $_GET["ticker"];
 
     $result = $db->query("SELECT * from INSTRUMENT where TRADING_SYMBOL='$ticker' LIMIT 1");
-
+    // If ticker does exist then proceed to query DB to return the latest quotes
     if(mysqli_num_rows($result) > 0) {
-        #echo "Stock Ticker Exists";
-        $quotes = $db->query("SELECT * FROM STOCK_QUOTE where TRADING_SYMBOL='$ticker' LIMIT 5");
+        $quotes = $db->query("SELECT * FROM STOCK_QUOTE where TRADING_SYMBOL='$ticker' ORDER BY QUOTE_DATE DESC LIMIT 5");
 
         while ($row = $quotes->fetch_assoc()) {
             $rows[] = $row;
@@ -48,9 +47,11 @@ function submit_bid_ask_form($db) {
     // Check if ticker exists
     $ticker = $_POST["ticker"];
     $type = $_POST["type"];
+
     $result = $db->query("SELECT * from INSTRUMENT where TRADING_SYMBOL='$ticker' LIMIT 1");
+    // If ticker does exist then proceed to match bid or ask
     if (mysqli_num_rows($result) > 0) {
-        // grap all data from form
+        // Grab all the form data
         $row = $result->fetch_assoc();
         $instrumentID = $row["INSTRUMENT_ID"];
         $ticker = $row["TRADING_SYMBOL"];
@@ -59,8 +60,8 @@ function submit_bid_ask_form($db) {
         $time = $_POST["time"];
         $random = rand(0, 12000);
 
-        // check if it's a bid or an ask
-        /////////////////////////// when type is a bid ///////////////////////
+        // Check if it's a bid or an ask
+        // BID TYPE
         if ($type == "bid") {
             // Insert the bid to STOCK_QUOTE
             $sql = "INSERT INTO STOCK_QUOTE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), 0, 0, $price, $size)";
@@ -70,8 +71,12 @@ function submit_bid_ask_form($db) {
 
                 // Look for asks that satisfies the bid
                 // Price should always match, but for sizes there are two different situations
-                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE ASK_PRICE=$price AND ASK_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1"); // when an ask size is greater or equal than the bid's
-                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE ASK_PRICE=$price AND ASK_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1"); // when an ask size is smaller than the bid's
+
+                // Ask size is greater or equal than the bid's
+                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE ASK_PRICE=$price AND ASK_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
+
+                // Ask size is smaller than the bid's
+                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE ASK_PRICE=$price AND ASK_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
 
                 // Assume that we find an ask which has equal or greater size
                 if (mysqli_num_rows($result) > 0) {
@@ -80,8 +85,7 @@ function submit_bid_ask_form($db) {
                     if ($db->query($sql) == TRUE) {
                         echo "A transaction was made successfully, with price: $price, size: $size";
                     } else {
-                        echo "A bid was added into STOCK_QUOTE table.";
-                        echo "And a matched ask was found, but transaction failed.";
+                        echo "A bid was added into STOCK_QUOTE table and a matched ask was found, but transaction failed.";
                     }
 
                 // Assume that we find an ask with desired price but smaller size
@@ -94,14 +98,12 @@ function submit_bid_ask_form($db) {
                         $remainder = $size - $partial_size;
                         echo "Only partial transactions were made, please put another bid with remaining size: $remainder.";
                     } else {
-                        echo "A bid was added into STOCK_QUOTE table.";
-                        echo "Partial ask was found, but transaction failed.";
+                        echo "A bid was added into STOCK_QUOTE table and a partial ask was found, but transaction failed.";
                     }
 
                 // Does not find a match
                 } else {
-                    echo "An bid was added into STOCK_QUOTE table. ";
-                    echo "No current asks matche your bid. No transaction was made. But if there is any matched ask is post with time frame you set, system will automatically match your bid with that ask.";
+                    echo "An bid was added into STOCK_QUOTE table. No current asks match your bid. No transaction was made. If a matched ask appeared within the time frame you set, the system will automatically match your bid with that ask.";
                 }
 
             // Fail to insert the bid
@@ -109,7 +111,8 @@ function submit_bid_ask_form($db) {
                 echo "Failed to insert the bid, try again";
             }
 
-        /////////////////////////// when type is an ask ///////////////////////
+
+        // ASK Type
         } else {
             // Insert the ask to STOCK_QUOTE
             $sql = "INSERT INTO STOCK_QUOTE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size, 0, 0)";
@@ -119,8 +122,12 @@ function submit_bid_ask_form($db) {
 
                 // Look for asks that satisfies the bid
                 // Price should always match, but for sizes there are two different situations
-                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE BID_PRICE=$price AND BID_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1"); // when an bid size is greater or equal than the ask's
-                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE BID_PRICE=$price AND BID_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1"); // when an bid size is smaller than the ask's
+
+                // Bid size is greater or equal than the ask's
+                $result = $db->query("SELECT * FROM STOCK_QUOTE WHERE BID_PRICE=$price AND BID_SIZE<$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
+
+                // Bid size is smaller than the ask's
+                $result_partial = $db->query("SELECT * FROM STOCK_QUOTE WHERE BID_PRICE=$price AND BID_SIZE>=$size AND TIMESTAMPDIFF(MINUTE, QUOTE_TIME, NOW())<30 LIMIT 1");
 
                 // Assume that we find an ask which has equal or greater size
                 if (mysqli_num_rows($result) > 0) {
@@ -132,8 +139,7 @@ function submit_bid_ask_form($db) {
                         $newsize = $size - $size2;
                         echo "Please put another ask with remaining size: $newsize";
                     } else {
-                        echo "An ask was added into STOCK_QUOTE table.";
-                        echo "And a matched bid was found, but transaction failed.";
+                        echo "An ask was added into STOCK_QUOTE table. And a matched bid was found, but transaction failed.";
                     }
 
                 // Assume that we find an ask with desired price but smaller size
@@ -141,17 +147,14 @@ function submit_bid_ask_form($db) {
                     $row = $result_partial->fetch_assoc();
                     $sql = "INSERT INTO STOCK_TRADE VALUES ('$instrumentID', CURDATE(), $random, '$ticker', NOW(), $price, $size)";
                     if ($db->query($sql) == TRUE) {
-                        echo "An ask was added into STOCK_QUOTE table.";
                         echo "A transaction was made successfully, with price: $price, size: $size";
                     } else {
-                        echo "An ask was added into STOCK_QUOTE table.";
-                        echo "And a matched bid was found, but transaction failed.";
+                        echo "An ask was added into STOCK_QUOTE table. And a matched bid was found, but transaction failed.";
                     }
 
                 // Does not find a match
                 } else {
-                    echo "An ask was added into STOCK_QUOTE table.";
-                    echo "No current bids matched your ask. No transaction were made. But if there are any matched bid posted within the time frame you set, system will automatically match your ask with that bid.";
+                    echo "An ask was added into STOCK_QUOTE table. No current bids matched your ask. No transaction were made. But if there are any matched bid posted within the time frame you set, system will automatically match your ask with that bid.";
                 }
 
             // Fail to insert the bid
